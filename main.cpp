@@ -29,10 +29,16 @@ int main(int argc, char* argv[]) {
 		}
     	std::printf("\n");
 	}
+	float C[n] = {
+		6.71309, 1.84700, 2.61925, 7.53522,
+		8.16581, 8.69585, 8.15835, 7.02395,
+		-8.97898, -8.22587, -5.07179, -2.09032,
+		-7.82172, -8.09718, -2.40825, -8.89823
+	};
 
 	float output[16];
 
-	matmul_2b(A, packed, output, 4, 4, 4, 1);
+	matmul_2b(C, packed, output, 4, 4, 4, 1);
 
 	for (unsigned int r = 0; r < 4; ++r) {
 		for (unsigned int c = 0; c < 4; ++c) {

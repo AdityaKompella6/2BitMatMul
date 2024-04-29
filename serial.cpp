@@ -49,12 +49,12 @@ static void packing(float *matrix, __uint8_t *res, const unsigned int size) {
 }
 
 // ex input shape:[100,b] weight_shape: [25,25] -> [100,b]
-static void matmul_2b(float *input, __uint8_t *weight, float *output, size_t input_rows, size_t input_cols, size_t weight_rows, size_t w_lda) {
+static void matmul_2b(float *input, __uint8_t *weight, float *output, size_t input_rows, size_t input_cols, size_t weight_rows, size_t weight_cols) {
   for(int i = 0; i < weight_rows; i++){
     for(int j = 0; j < input_cols; j++){
-        int acc = 0;
+        float acc = 0;
         for(int k = 0; k < input_rows; k+=4){
-        __uint8_t w = weight[i*w_lda + k/4];
+        __uint8_t w = weight[i*weight_cols + k/4];
         //Unpack w into 4 elements
         __uint8_t w1 = (w >> 6) & 0x3;
         __uint8_t w2 = (w >> 4) & 0x3;
@@ -64,27 +64,27 @@ static void matmul_2b(float *input, __uint8_t *weight, float *output, size_t inp
         printf("w1: %d, w2: %d, w3: %d, w4: %d\n", w1, w2, w3, w4);
 
         if (w1 == 0){
-            acc -= input[j*input_cols + k];
+            acc -= input[j*input_rows + k];
         } else if (w1 == 2){
-            acc += input[j*input_cols + k];
+            acc += input[j*input_rows + k];
         }
 
         if (w2 == 0){
-            acc -= input[j*input_cols + k+1];
+            acc -= input[j*input_rows + k+1];
         } else if (w2 == 2){
-            acc += input[j*input_cols + k+1];
+            acc += input[j*input_rows + k+1];
         }
 
         if (w3 == 0){
-            acc -= input[j*input_cols + k+2];
+            acc -= input[j*input_rows + k+2];
         } else if (w3 == 2){
-            acc += input[j*input_cols + k+2];
+            acc += input[j*input_rows + k+2];
         }
 
         if (w4 == 0){
-            acc -= input[j*input_cols + k+3];
+            acc -= input[j*input_rows + k+3];
         } else if (w4 == 2){
-            acc += input[j*input_cols + k+3];
+            acc += input[j*input_rows + k+3];
         }
 
         //Take the k,k+1,k+2,k+3 elements from input and dot product using if statements
