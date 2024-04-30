@@ -66,7 +66,6 @@ static void matmul_2b(float *input, __uint8_t *weight, float *output, size_t inp
         __uint8_t w3 = (w >> 2) & 0x3;
         __uint8_t w4 = w & 0x3;
 
-        printf("w1: %d, w2: %d, w3: %d, w4: %d\n", w1, w2, w3, w4);
 
         if (w1 == 0){
             acc -= input[j*input_rows + k];

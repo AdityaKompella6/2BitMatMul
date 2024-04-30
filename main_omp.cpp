@@ -1,14 +1,22 @@
 #include "omp.cpp"
-
+#include <random>
 int main(int argc, char* argv[]) { 
 	// row-major matrix
-	const unsigned int n = 16;
-	float A[n] = {
-		6.71309, 1.84700, 2.61925, 7.53522,
-		8.16581, 8.69585, 8.15835, 7.02395,
-		-8.97898, -8.22587, -5.07179, -2.09032,
-		-7.82172, -8.09718, -2.40825, -8.89823
-	};
+	unsigned int n = atoi(argv[1]);
+
+	float* A = new float[n];
+    float* C = new float[n];
+    float* output = new float[n];
+
+    // Randomly generate values for A and C matrices
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(-10.0, 10.0);
+
+    for (unsigned int i = 0; i < n; ++i) {
+        A[i] = dis(gen);
+        C[i] = dis(gen);
+    }
 
 	quantize2bit(A, n);
 
@@ -19,29 +27,18 @@ int main(int argc, char* argv[]) {
     	std::printf("\n");
 	}
 
-	__uint8_t packed[4];
+
+	__uint8_t packed[n/4];
 
 	packing(A, packed, n);
 
-	for (unsigned int r = 0; r < 1; ++r) {
-		for (unsigned int c = 0; c < 4; ++c) {
-			std::printf("%u ", packed[c + r*4]);
-		}
-    	std::printf("\n");
-	}
-	float C[n] = {
-		6.71309, 1.84700, 2.61925, 7.53522,
-		8.16581, 8.69585, 8.15835, 7.02395,
-		-8.97898, -8.22587, -5.07179, -2.09032,
-		-7.82172, -8.09718, -2.40825, -8.89823
-	};
+	int rows = std::sqrt(n);
+	int cols = std::sqrt(n);
 
-	float output[16];
+	matmul_2b(C, packed, output, rows, cols, rows, cols/4);
 
-	matmul_2b(C, packed, output, 4, 4, 4, 1);
-
-	for (unsigned int r = 0; r < 4; ++r) {
-		for (unsigned int c = 0; c < 4; ++c) {
+	for (unsigned int r = 0; r < rows; ++r) {
+		for (unsigned int c = 0; c < cols; ++c) {
 			std::printf("%f ", output[c + r*4]);
 		}
     	std::printf("\n");
