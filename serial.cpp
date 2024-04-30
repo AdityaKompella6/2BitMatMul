@@ -1,10 +1,8 @@
 #include <cstdio>
 #include <cmath>
-
 using namespace std;
 
 #define EPS 1e-5
-
 static void quantize2bit(float *matrix, const unsigned int num_elements) {
   // Calculate the gamma value (mean absolute value of the weights)
   float gamma = 0.0f;
@@ -37,7 +35,6 @@ an 8bit int:
 [-1,0,1,1] -> [0b00011010]
 */
 static void packing(float *matrix, __uint8_t *res, const unsigned int size) {
-    int num_bytes = size / 4;
     for (unsigned int i = 0; i < size; i += 4) {
       __uint8_t currRes = 0;
       currRes |= convert(matrix[i]) << 6; 
@@ -50,16 +47,17 @@ static void packing(float *matrix, __uint8_t *res, const unsigned int size) {
 
 // ex input shape:[100,b] weight_shape: [25,25] -> [100,b]
 static void matmul_2b(float *input, __uint8_t *weight, float *output, size_t input_rows, size_t input_cols, size_t weight_rows, size_t weight_cols) {
-  for(int i = 0; i < weight_rows; i++){
-    for(int j = 0; j < input_cols; j++){
+  for(size_t i = 0; i < weight_rows; i++){
+    for(size_t j = 0; j < input_cols; j++){
         float acc = 0;
-        for(int k = 0; k < input_rows; k+=4){
+        for(size_t k = 0; k < input_rows; k+=4){
         __uint8_t w = weight[i*weight_cols + k/4];
         //Unpack w into 4 elements
         __uint8_t w1 = (w >> 6) & 0x3;
         __uint8_t w2 = (w >> 4) & 0x3;
         __uint8_t w3 = (w >> 2) & 0x3;
         __uint8_t w4 = w & 0x3;
+
 
         if (w1 == 0){
             acc -= input[j*input_rows + k];

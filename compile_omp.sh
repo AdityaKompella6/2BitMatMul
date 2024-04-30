@@ -1,1 +1,1 @@
-g++ -o omp_matmul main_omp.cpp omp.cpp
+g++ -fopenmp -o omp_matmul main_omp.cpp omp.cpp
